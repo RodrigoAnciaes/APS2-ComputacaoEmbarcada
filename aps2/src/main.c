@@ -24,6 +24,14 @@ LV_IMG_DECLARE(fumaca);
 #define LV_HOR_RES_MAX          (320)
 #define LV_VER_RES_MAX          (240)
 
+/************************************************************************/
+/* MAG-NET*/
+
+#define MAGNET_PIO		   PIOA
+#define MAGNET_PIO_ID	   ID_PIOA
+#define MAGNET_PIO_IDX	   11  // alterar para 19 quando usar o MAG-NET
+#define MAGNET_PIO_IDX_MASK (1 << MAGNET_PIO_IDX)
+
 static lv_disp_draw_buf_t disp_buf;
 static lv_color_t buf_1[LV_HOR_RES_MAX * LV_VER_RES_MAX];
 static lv_disp_drv_t disp_drv;
@@ -76,6 +84,9 @@ void RTC_init(Rtc *rtc, uint32_t id_rtc, calendar t, uint32_t irq_type);
 #define TASK_LCD_STACK_SIZE                (1024*6/sizeof(portSTACK_TYPE))
 #define TASK_LCD_STACK_PRIORITY            (tskIDLE_PRIORITY)
 
+#define TASK_MAGNET_STACK_SIZE             (1024*6/sizeof(portSTACK_TYPE))
+#define TASK_MAGNET_STACK_PRIORITY         (tskIDLE_PRIORITY)
+
 extern void vApplicationStackOverflowHook(xTaskHandle *pxTask,  signed char *pcTaskName);
 extern void vApplicationIdleHook(void);
 extern void vApplicationTickHook(void);
@@ -89,6 +100,28 @@ extern void vApplicationIdleHook(void) { }
 extern void vApplicationTickHook(void) { }
 extern void vApplicationMallocFailedHook(void) {
 	configASSERT( ( volatile void * ) NULL );
+}
+
+static void RTT_init(float freqPrescale, uint32_t IrqNPulses, uint32_t rttIRQSource) {
+	uint16_t pllPreScale = (int) (((float) 32768) / freqPrescale);
+	rtt_sel_source(RTT, false);
+	rtt_init(RTT, pllPreScale);
+	if (rttIRQSource & RTT_MR_ALMIEN) {
+		uint32_t ul_previous_time;
+		ul_previous_time = rtt_read_timer_value(RTT);
+		while (ul_previous_time == rtt_read_timer_value(RTT));
+		rtt_write_alarm_time(RTT, IrqNPulses+ul_previous_time);
+	}
+	/* config NVIC */
+	NVIC_DisableIRQ(RTT_IRQn);
+	NVIC_ClearPendingIRQ(RTT_IRQn);
+	NVIC_SetPriority(RTT_IRQn, 4);
+	NVIC_EnableIRQ(RTT_IRQn);
+	/* Enable RTT interrupt */
+	if (rttIRQSource & (RTT_MR_RTTINCIEN | RTT_MR_ALMIEN))
+	rtt_enable_interrupt(RTT, rttIRQSource);
+	else
+	rtt_disable_interrupt(RTT, RTT_MR_RTTINCIEN | RTT_MR_ALMIEN);
 }
 
 /************************************************************************/
@@ -290,6 +323,41 @@ void lv_termostato(void) {
 	lv_label_set_text_fmt(labelFT2, "TEMP");
 }
 
+
+/************************************************************************/
+/* callbacks                                                               */
+/************************************************************************/
+// Queues
+QueueHandle_t xQueueMagnet;
+
+volatile uint32_t start_mag = 0;
+
+void magnet_callback(void){
+
+	if (start_mag == 0){
+		start_mag = 1;
+		RTT_init(10000, 2353, 0);
+		}
+	else{
+		printf("Magnet\n");
+		uint32_t tempo = rtt_read_timer_value(RTT);
+		// tempo em segundos
+		RTT_init(10000, 2353, 0);
+		xQueueSendFromISR(xQueueMagnet, &tempo, NULL);
+		}
+
+}
+
+void MAGNET_INIT(){
+	pmc_enable_periph_clk(MAGNET_PIO_ID);
+	pio_set_input(MAGNET_PIO,MAGNET_PIO_IDX_MASK,PIO_PULLUP);
+	pio_handler_set(MAGNET_PIO, MAGNET_PIO_ID, MAGNET_PIO_IDX_MASK, PIO_IT_RISE_EDGE, magnet_callback);
+	pio_enable_interrupt(MAGNET_PIO, MAGNET_PIO_IDX_MASK);
+	NVIC_EnableIRQ(MAGNET_PIO_ID);
+	NVIC_SetPriority(MAGNET_PIO_ID, 4);
+}
+
+
 /************************************************************************/
 /* TASKS                                                                */
 /************************************************************************/
@@ -321,6 +389,21 @@ static void task_clock(void *pvParameters) {
 	}
 }
 
+void task_magnet(void *pvParameters){
+	uint32_t tempo;
+	float tempo_em_segundos;
+	printf("Task Magnet created!\n");
+	while(1){
+		// read the magnet queue
+		if (xQueueReceive(xQueueMagnet, &tempo, portMAX_DELAY) == pdTRUE){
+				tempo_em_segundos = (float)tempo/10000;
+				printf("Tempo em segundos: %f\n", tempo_em_segundos);
+			}
+		}
+
+		// sleep the task ulntil the next magnet event
+		pmc_sleep(SAM_PM_SMODE_SLEEP_WFI);
+}
 /************************************************************************/
 /* configs                                                              */
 /************************************************************************/
@@ -408,6 +491,7 @@ int main(void) {
 	board_init();
 	sysclk_init();
 	configure_console();
+	MAGNET_INIT();
 	/* Disable the watchdog */                                                                      
     WDT->WDT_MR = WDT_MR_WDDIS;  
 
@@ -418,6 +502,8 @@ int main(void) {
 	
 	xMutexLVGL = xSemaphoreCreateMutex();
 
+	xQueueMagnet = xQueueCreate(10, sizeof(uint32_t));
+
 	/* Create task to control oled */
 	if (xTaskCreate(task_lcd, "LCD", TASK_LCD_STACK_SIZE, NULL, TASK_LCD_STACK_PRIORITY, NULL) != pdPASS) {
 		printf("Failed to create lcd task\r\n");
@@ -425,6 +511,9 @@ int main(void) {
 
 	if (xTaskCreate(task_clock, "Clock", TASK_LCD_STACK_SIZE, NULL, TASK_LCD_STACK_PRIORITY, NULL) != pdPASS) {
 		printf("Failed to create clock task\r\n");
+	}
+	if (xTaskCreate(task_magnet, "Magnet", TASK_MAGNET_STACK_SIZE, NULL, TASK_MAGNET_STACK_PRIORITY, NULL) != pdPASS) {
+		printf("Failed to create magnet task\r\n");
 	}
 	
 	/* Start the scheduler. */
