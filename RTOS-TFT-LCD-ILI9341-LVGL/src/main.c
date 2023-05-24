@@ -9,6 +9,14 @@
 #include "touch/touch.h"
 
 /************************************************************************/
+/* MAG-NET*/
+
+#define MAGNET_PIO		   PIOA
+#define MAGNET_PIO_ID	   ID_PIOA
+#define MAGNET_PIO_IDX	   11  // alterar para 19 quando usar o MAG-NET
+#define MAGNET_PIO_IDX_MASK (1 << MAGNET_PIO_IDX)
+
+/************************************************************************/
 /* LCD / LVGL                                                           */
 /************************************************************************/
 
@@ -37,6 +45,7 @@ lv_obj_t * SecondDigt;
 volatile int tipo = 0;
 volatile uint32_t current_hour, current_min, current_sec;
 volatile uint32_t current_year, current_month, current_day, current_week;
+volatile uint32_t start_mag = 0;
 
 volatile char flag_rtc_alarm = 0;
 // alarm semaphore
@@ -55,6 +64,24 @@ typedef struct  {
   uint32_t second;
 } calendar;
 
+// Queues
+QueueHandle_t xQueueMagnet;
+
+void magnet_callback(void){
+	if (pio_get(PIOA, PIO_TYPE_PIO_INPUT, MAGNET_PIO_IDX_MASK) == 0) {
+		if (start_mag == 0){
+			start_mag = 1;
+			RTT_init(10000, 2353, 0);
+		}
+		else{
+			printf("Magnet\n");
+			uint32_t tempo = rtt_read_timer_value(RTT);
+			RTT_init(10000, 2353, 0);
+			xQueueSendFromISR(xQueueMagnet, &tempo, NULL);
+		}
+	}
+}
+
 
 void RTC_init(Rtc *rtc, uint32_t id_rtc, calendar t, uint32_t irq_type);
 void lv_termostato(void);
@@ -67,6 +94,11 @@ void lv_termostato(void);
 #define TASK_LCD_STACK_PRIORITY            (tskIDLE_PRIORITY)
 #define TASK_CLOCK_STACK_SIZE              (1024*6/sizeof(portSTACK_TYPE))
 #define TASK_CLOCK_STACK_PRIORITY          (tskIDLE_PRIORITY)
+
+#define TASK_MAGNET_STACK_SIZE             (1024*6/sizeof(portSTACK_TYPE))
+#define TASK_MAGNET_STACK_PRIORITY         (tskIDLE_PRIORITY)
+
+
 
 extern void vApplicationStackOverflowHook(xTaskHandle *pxTask,  signed char *pcTaskName);
 extern void vApplicationIdleHook(void);
@@ -131,6 +163,28 @@ void RTC_init(Rtc *rtc, uint32_t id_rtc, calendar t, uint32_t irq_type) {
 
 	/* Ativa interrupcao via alarme */
 	rtc_enable_interrupt(rtc,  irq_type);
+}
+
+static void RTT_init(float freqPrescale, uint32_t IrqNPulses, uint32_t rttIRQSource) {
+	uint16_t pllPreScale = (int) (((float) 32768) / freqPrescale);
+	rtt_sel_source(RTT, false);
+	rtt_init(RTT, pllPreScale);
+	if (rttIRQSource & RTT_MR_ALMIEN) {
+		uint32_t ul_previous_time;
+		ul_previous_time = rtt_read_timer_value(RTT);
+		while (ul_previous_time == rtt_read_timer_value(RTT));
+		rtt_write_alarm_time(RTT, IrqNPulses+ul_previous_time);
+	}
+	/* config NVIC */
+	NVIC_DisableIRQ(RTT_IRQn);
+	NVIC_ClearPendingIRQ(RTT_IRQn);
+	NVIC_SetPriority(RTT_IRQn, 4);
+	NVIC_EnableIRQ(RTT_IRQn);
+	/* Enable RTT interrupt */
+	if (rttIRQSource & (RTT_MR_RTTINCIEN | RTT_MR_ALMIEN))
+	rtt_enable_interrupt(RTT, rttIRQSource);
+	else
+	rtt_disable_interrupt(RTT, RTT_MR_RTTINCIEN | RTT_MR_ALMIEN);
 }
 
 /************************************************************************/
@@ -389,14 +443,14 @@ void task_clock(void *pvParameters) {
 	for (;;) {
 		// se o alarme o semafaro (xSemaphoreAlarm) for ativado, atualiza o relógio
 		if (xSemaphoreTake(xSemaphoreAlarm, 0) == pdTRUE){
-			printf("Alarme ativado\n");
+			// printf("Alarme ativado\n");
 			rtc_get_time(RTC, &current_hour, &current_min, &current_sec);
 			// prita o segundo no display
-			printf("Segundo: %d \r ", current_sec);
+			// printf("Segundo: %d \r ", current_sec);
 			// printa o minuto no display
-			printf("Minuto: %d \r ", current_min);
+			// printf("Minuto: %d \r ", current_min);
 			// printa a hora no display
-			printf("Hora: %d \r ", current_hour);
+			// printf("Hora: %d \r ", current_hour);
 			if (current_sec == 59) {
 				current_sec = 0;
 				current_min++;
@@ -492,6 +546,30 @@ void configure_lvgl(void) {
 	lv_indev_t * my_indev = lv_indev_drv_register(&indev_drv);
 }
 
+void MAGNET_INIT(){
+	pmc_enable_periph_clk(MAGNET_PIO_ID);
+	pio_set_input(MAGNET_PIO,MAGNET_PIO_IDX_MASK,PIO_PULLUP);
+	pio_handler_set(MAGNET_PIO, MAGNET_PIO_ID, MAGNET_PIO_IDX_MASK, PIO_IT_RISE_EDGE, magnet_callback);
+	pio_enable_interrupt(MAGNET_PIO, MAGNET_PIO_IDX_MASK);
+	NVIC_EnableIRQ(MAGNET_PIO_ID);
+	NVIC_SetPriority(MAGNET_PIO_ID, 4);
+}
+
+void task_magnet(void *pvParameters){
+	uint32_t magnet_event;
+	printf("Task Magnet created!\n");
+	while(1){
+		// read the magnet queue
+		if (xQueueReceive(xQueueMagnet, &magnet_event, portMAX_DELAY) == pdTRUE){
+				printf("Magnet event: %d\n", magnet_event);
+			}
+		}
+
+		// sleep the task ulntil the next magnet event
+		pmc_sleep(SAM_PM_SMODE_SLEEP_WFI);
+}
+
+
 
 /************************************************************************/
 /* main                                                                 */
@@ -501,6 +579,7 @@ int main(void) {
 	board_init();
 	sysclk_init();
 	configure_console();
+	MAGNET_INIT();
 
 	xMutexLVGL = xSemaphoreCreateMutex();
 
@@ -511,6 +590,11 @@ int main(void) {
 
 	// cria o semáforo do alarme (inicialmente bloqueado)
 	xSemaphoreAlarm = xSemaphoreCreateBinary();
+
+	
+	xQueueMagnet = xQueueCreate(100, sizeof(int));
+
+
 
 	/** Configura RTC */                                                                            
     calendar rtc_initial = {2018, 3, 19, 12, 15, 45 ,1};                                            
@@ -528,6 +612,10 @@ int main(void) {
 	// cria a tarefa do relógio
 	if (xTaskCreate(task_clock, "Clock", TASK_CLOCK_STACK_SIZE, NULL, TASK_CLOCK_STACK_PRIORITY, NULL) != pdPASS) {
 		printf("Failed to create clock task\r\n");
+	}
+
+	if (xTaskCreate(task_magnet, "Magnet", TASK_MAGNET_STACK_SIZE, NULL, TASK_MAGNET_STACK_PRIORITY, NULL) != pdPASS) {
+		printf("Failed to create magnet task\r\n");
 	}
 	
 	/* Start the scheduler. */

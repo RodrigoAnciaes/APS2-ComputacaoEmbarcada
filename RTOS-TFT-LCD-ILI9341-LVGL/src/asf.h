@@ -105,6 +105,9 @@
 // From module: RTC - Real Time Clock
 #include <rtc.h>
 
+// From module: RTT - Real Time Timer
+#include <rtt.h>
+
 // From module: SAM FPU driver
 #include <fpu.h>
 
@@ -139,6 +142,7 @@
 
 // From module: UART - Univ. Async Rec/Trans
 #include <uart.h>
+
 
 // From module: USART - Serial interface - SAM implementation for devices with both UART and USART
 #include <serial.h>
