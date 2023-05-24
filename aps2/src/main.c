@@ -66,7 +66,7 @@ volatile char setPower;
 
 volatile float diametro_roda = 2;
 
-static float PI = 3.14159265358979323846;
+#include "arm_math.h"
 
 SemaphoreHandle_t xMutexLVGL;
 
@@ -418,6 +418,73 @@ void task_magnet(void *pvParameters){
 		// sleep the task ulntil the next magnet event
 		pmc_sleep(SAM_PM_SMODE_SLEEP_WFI);
 }
+
+
+/********************************************************************/
+/* Simulador de velocidade                                          */
+
+#define TASK_SIMULATOR_STACK_SIZE (4096 / sizeof(portSTACK_TYPE))
+#define TASK_SIMULATOR_STACK_PRIORITY (tskIDLE_PRIORITY)
+
+#define RAIO 0.508/2
+#define VEL_MAX_KMH  5.0f
+#define VEL_MIN_KMH  0.5f
+//#define RAMP 
+
+/**
+* raio 20" => 50,8 cm (diametro) => 0.508/2 = 0.254m (raio)
+* w = 2 pi f (m/s)
+* v [km/h] = (w*r) / 3.6 = (2 pi f r) / 3.6
+* f = v / (2 pi r 3.6)
+* Exemplo : 5 km / h = 1.38 m/s
+*           f = 0.87Hz
+*           t = 1/f => 1/0.87 = 1,149s
+*/
+float kmh_to_hz(float vel, float raio) {
+    float f = vel / (2*PI*raio*3.6);
+    return(f);
+}
+
+static void task_simulador(void *pvParameters) {
+
+    pmc_enable_periph_clk(ID_PIOC);
+    pio_set_output(PIOC, PIO_PC31, 1, 0, 0);
+
+    float vel = VEL_MAX_KMH;
+    float f;
+    int ramp_up = 1;
+
+    while(1){
+        pio_clear(PIOC, PIO_PC31);
+        delay_ms(1);
+        pio_set(PIOC, PIO_PC31);
+#ifdef RAMP
+        if (ramp_up) {
+            printf("[SIMU] ACELERANDO: %d \n", (int) (10*vel));
+            vel += 0.5;
+        } else {
+            printf("[SIMU] DESACELERANDO: %d \n",  (int) (10*vel));
+            vel -= 0.5;
+        }
+
+        if (vel >= VEL_MAX_KMH)
+        ramp_up = 0;
+    else if (vel <= VEL_MIN_KMH)
+    ramp_up = 1;
+	#endif
+#ifndef RAMP
+        vel = 5;
+        printf("[SIMU] CONSTANTE: %d \n", (int) (10*vel));
+#endif
+        f = kmh_to_hz(vel, RAIO);
+        int t = 965*(1.0/f); //UTILIZADO 965 como multiplicador ao invés de 1000
+                             //para compensar o atraso gerado pelo Escalonador do freeRTOS
+        delay_ms(t);
+    }
+}
+
+
+
 /************************************************************************/
 /* configs                                                              */
 /************************************************************************/
@@ -530,7 +597,7 @@ int main(void) {
 	if (xTaskCreate(task_magnet, "Magnet", TASK_MAGNET_STACK_SIZE, NULL, TASK_MAGNET_STACK_PRIORITY, NULL) != pdPASS) {
 		printf("Failed to create magnet task\r\n");
 	}
-	
+
 	/* Start the scheduler. */
 	vTaskStartScheduler();
 
