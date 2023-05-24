@@ -63,6 +63,10 @@ lv_obj_t * scr2;
 
 volatile char setPower;
 
+volatile float diametro_roda = 2;
+
+static float PI = 3.14159265358979323846;
+
 SemaphoreHandle_t xMutexLVGL;
 
 typedef struct  {
@@ -392,12 +396,21 @@ static void task_clock(void *pvParameters) {
 void task_magnet(void *pvParameters){
 	uint32_t tempo;
 	float tempo_em_segundos;
+	float velocidade;
+	float ultima_velocidade = 0;
+	float aceleracao;
 	printf("Task Magnet created!\n");
 	while(1){
 		// read the magnet queue
 		if (xQueueReceive(xQueueMagnet, &tempo, portMAX_DELAY) == pdTRUE){
 				tempo_em_segundos = (float)tempo/10000;
 				printf("Tempo em segundos: %f\n", tempo_em_segundos);
+				float raio = diametro_roda/2;
+				velocidade = (2*PI*raio)/tempo_em_segundos;
+				printf("Velocidade: %f\n", velocidade);
+				aceleracao = (velocidade - ultima_velocidade)/tempo_em_segundos;
+				printf("Aceleracao: %f\n", aceleracao);
+				ultima_velocidade = velocidade;
 			}
 		}
 
