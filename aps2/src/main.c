@@ -21,8 +21,8 @@ LV_IMG_DECLARE(fumaca);
 /* LCD / LVGL                                                           */
 /************************************************************************/
 
-#define LV_HOR_RES_MAX          (320)
-#define LV_VER_RES_MAX          (240)
+#define LV_HOR_RES_MAX          (240)
+#define LV_VER_RES_MAX          (320)
 
 /************************************************************************/
 /* MAG-NET*/
@@ -47,6 +47,7 @@ lv_obj_t * labelFloor;
 lv_obj_t * labelFloorDigit;
 lv_obj_t * labelSetValue;
 lv_obj_t * labelClock;
+lv_obj_t * labelVelocidade;
 lv_obj_t * labelChave;
 lv_obj_t * labelHome;
 lv_obj_t * labelCelsius;
@@ -158,25 +159,25 @@ static void but3_callback(lv_event_t * e) {
 }
 
 static void down_handler(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    char *c;
-    int temp;
-    if(code == LV_EVENT_CLICKED) {
-        c = lv_label_get_text(labelSetValue);
-        temp = atoi(c);
-        lv_label_set_text_fmt(labelSetValue, "%02d", temp - 1);
-    }
+//     lv_event_code_t code = lv_event_get_code(e);
+//     char *c;
+//     int temp;
+//     if(code == LV_EVENT_CLICKED) {
+//         c = lv_label_get_text(labelSetValue);
+//         temp = atoi(c);
+//         lv_label_set_text_fmt(labelSetValue, "%02d", temp - 1);
+//     }
 }
 
 static void up_handler(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    char *c;
-    int temp;
-    if(code == LV_EVENT_CLICKED) {
-        c = lv_label_get_text(labelSetValue);
-        temp = atoi(c);
-        lv_label_set_text_fmt(labelSetValue, "%02d", temp + 1);
-    }
+//     lv_event_code_t code = lv_event_get_code(e);
+//     char *c;
+//     int temp;
+//     if(code == LV_EVENT_CLICKED) {
+//         c = lv_label_get_text(labelSetValue);
+//         temp = atoi(c);
+//         lv_label_set_text_fmt(labelSetValue, "%02d", temp + 1);
+//     }
 }
 
 void lv_termostato(void) {
@@ -193,73 +194,73 @@ void lv_termostato(void) {
 	
     lv_obj_t * btn1 = lv_btn_create(scr1);
     lv_obj_add_event_cb(btn1, event_handler, LV_EVENT_ALL, NULL);
-    lv_obj_align(btn1, LV_ALIGN_BOTTOM_LEFT, 5, -10);
+    lv_obj_align(btn1, LV_ALIGN_TOP_LEFT, 3, -3);
     labelBtn1 = lv_label_create(btn1);
-	lv_label_set_text(labelBtn1, "[  "LV_SYMBOL_POWER);
+	lv_label_set_text(labelBtn1, "[  "LV_SYMBOL_POWER" ]");
     lv_obj_center(labelBtn1);
 	lv_obj_add_style(btn1, &style, 0);
 	
 	lv_obj_t * btn6 = lv_btn_create(scr2);
 	lv_obj_add_event_cb(btn6, event_handler, LV_EVENT_ALL, NULL);
-	lv_obj_align(btn6, LV_ALIGN_BOTTOM_LEFT, 20, -20);
+	lv_obj_align(btn6, LV_ALIGN_TOP_LEFT, 10, -10);
 	labelBtn6 = lv_label_create(btn6);
 	lv_label_set_text(labelBtn6, LV_SYMBOL_POWER);
 	lv_obj_center(labelBtn6);
 	lv_obj_add_style(btn6, &style, 0);
 
-	lv_obj_t * btn2 = lv_btn_create(scr1);
-    lv_obj_add_event_cb(btn2, but2_callback, LV_EVENT_ALL, NULL);
-	lv_obj_align_to(btn2, btn1, LV_ALIGN_OUT_RIGHT_TOP, -5, 0);
-    labelBtn2 = lv_label_create(btn2);
-	lv_label_set_text(labelBtn2, "| M |" );
-    lv_obj_center(labelBtn2);
-	lv_obj_add_style(btn2, &style, 0);
-
-	lv_obj_t * btn3 = lv_imgbtn_create(scr1);
-	lv_imgbtn_set_src(btn3, LV_IMGBTN_STATE_RELEASED, 0, &clock, 0);
-	lv_obj_add_flag(btn3, LV_OBJ_FLAG_CHECKABLE);
-	lv_obj_add_event_cb(btn3, but3_callback, LV_EVENT_ALL, NULL);
-	lv_obj_set_height(btn3, 25);
-	lv_obj_set_width(btn3, 25);
-	lv_obj_align_to(btn3, btn2, LV_ALIGN_OUT_RIGHT_TOP, 3, 9);
-
-	labelChave = lv_label_create(scr1);
-	lv_obj_align_to(labelChave, btn3, LV_ALIGN_OUT_RIGHT_MID, 0, -3);
-	lv_obj_set_style_text_color(labelChave, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelChave, "  ]");
-
-	labelHome = lv_label_create(scr1);
-	lv_obj_align_to(labelHome, labelChave, LV_ALIGN_OUT_RIGHT_MID, 0, -30);
-	lv_obj_set_style_text_color(labelHome, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelHome, LV_SYMBOL_HOME"");
-
-	lv_obj_t * btn4 = lv_btn_create(scr1);
-    lv_obj_add_event_cb(btn4, up_handler, LV_EVENT_ALL, NULL);
-	lv_obj_align_to(btn4, labelChave, LV_ALIGN_OUT_RIGHT_TOP, 20, -7);
-    labelBtn4 = lv_label_create(btn4);
-	lv_label_set_text(labelBtn4, "[ "LV_SYMBOL_UP"  |");
-    lv_obj_center(labelBtn4);
-	lv_obj_add_style(btn4, &style, 0);
-
-	lv_obj_t * btn5 = lv_btn_create(scr1);
-    lv_obj_add_event_cb(btn5, down_handler, LV_EVENT_ALL, NULL);
-	lv_obj_align_to(btn5, btn4, LV_ALIGN_OUT_RIGHT_TOP, -5, 0);
-    labelBtn5 = lv_label_create(btn5);
-	lv_label_set_text(labelBtn5, LV_SYMBOL_DOWN"  ]");
-    lv_obj_center(labelBtn5);
-	lv_obj_add_style(btn5, &style, 0);
-
-	labelFloor = lv_label_create(scr1);
-    lv_obj_align(labelFloor, LV_ALIGN_LEFT_MID, 35 , -25);
-    lv_obj_set_style_text_font(labelFloor, &dseg70, LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(labelFloor, lv_color_white(), LV_STATE_DEFAULT);
-    lv_label_set_text_fmt(labelFloor, "%02d", 23);
-
-	labelFloorDigit = lv_label_create(scr1);
-    lv_obj_align_to(labelFloorDigit, labelFloor, LV_ALIGN_OUT_RIGHT_BOTTOM, 0, -15);
-    lv_obj_set_style_text_font(labelFloorDigit, &dseg40, LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(labelFloorDigit, lv_color_white(), LV_STATE_DEFAULT);
-    lv_label_set_text_fmt(labelFloorDigit, ".%d", 4);
+// 	lv_obj_t * btn2 = lv_btn_create(scr1);
+//     lv_obj_add_event_cb(btn2, but2_callback, LV_EVENT_ALL, NULL);
+// 	lv_obj_align_to(btn2, btn1, LV_ALIGN_OUT_RIGHT_TOP, -5, 0);
+//     labelBtn2 = lv_label_create(btn2);
+// 	lv_label_set_text(labelBtn2, "| M |" );
+//     lv_obj_center(labelBtn2);
+// 	lv_obj_add_style(btn2, &style, 0);
+// 
+// 	lv_obj_t * btn3 = lv_imgbtn_create(scr1);
+// 	lv_imgbtn_set_src(btn3, LV_IMGBTN_STATE_RELEASED, 0, &clock, 0);
+// 	lv_obj_add_flag(btn3, LV_OBJ_FLAG_CHECKABLE);
+// 	lv_obj_add_event_cb(btn3, but3_callback, LV_EVENT_ALL, NULL);
+// 	lv_obj_set_height(btn3, 25);
+// 	lv_obj_set_width(btn3, 25);
+// 	lv_obj_align_to(btn3, btn2, LV_ALIGN_OUT_RIGHT_TOP, 3, 9);
+// 
+// 	labelChave = lv_label_create(scr1);
+// 	lv_obj_align_to(labelChave, btn3, LV_ALIGN_OUT_RIGHT_MID, 0, -3);
+// 	lv_obj_set_style_text_color(labelChave, lv_color_white(), LV_STATE_DEFAULT);
+// 	lv_label_set_text_fmt(labelChave, "  ]");
+// 
+// 	labelHome = lv_label_create(scr1);
+// 	lv_obj_align_to(labelHome, labelChave, LV_ALIGN_OUT_RIGHT_MID, 0, -30);
+// 	lv_obj_set_style_text_color(labelHome, lv_color_white(), LV_STATE_DEFAULT);
+// 	lv_label_set_text_fmt(labelHome, LV_SYMBOL_HOME"");
+// 
+// 	lv_obj_t * btn4 = lv_btn_create(scr1);
+//     lv_obj_add_event_cb(btn4, up_handler, LV_EVENT_ALL, NULL);
+// 	lv_obj_align_to(btn4, labelChave, LV_ALIGN_OUT_RIGHT_TOP, 20, -7);
+//     labelBtn4 = lv_label_create(btn4);
+// 	lv_label_set_text(labelBtn4, "[ "LV_SYMBOL_UP"  |");
+//     lv_obj_center(labelBtn4);
+// 	lv_obj_add_style(btn4, &style, 0);
+// 
+// 	lv_obj_t * btn5 = lv_btn_create(scr1);
+//     lv_obj_add_event_cb(btn5, down_handler, LV_EVENT_ALL, NULL);
+// 	lv_obj_align_to(btn5, btn4, LV_ALIGN_OUT_RIGHT_TOP, -5, 0);
+//     labelBtn5 = lv_label_create(btn5);
+// 	lv_label_set_text(labelBtn5, LV_SYMBOL_DOWN"  ]");
+//     lv_obj_center(labelBtn5);
+// 	lv_obj_add_style(btn5, &style, 0);
+// 
+// 	labelFloor = lv_label_create(scr1);
+//     lv_obj_align(labelFloor, LV_ALIGN_LEFT_MID, 35 , -25);
+//     lv_obj_set_style_text_font(labelFloor, &dseg70, LV_STATE_DEFAULT);
+//     lv_obj_set_style_text_color(labelFloor, lv_color_white(), LV_STATE_DEFAULT);
+//     lv_label_set_text_fmt(labelFloor, "%02d", 23);
+// 
+// 	labelFloorDigit = lv_label_create(scr1);
+//     lv_obj_align_to(labelFloorDigit, labelFloor, LV_ALIGN_OUT_RIGHT_BOTTOM, 0, -15);
+//     lv_obj_set_style_text_font(labelFloorDigit, &dseg40, LV_STATE_DEFAULT);
+//     lv_obj_set_style_text_color(labelFloorDigit, lv_color_white(), LV_STATE_DEFAULT);
+//     lv_label_set_text_fmt(labelFloorDigit, ".%d", 4);
 
 	labelClock = lv_label_create(scr1);
 	lv_obj_align(labelClock, LV_ALIGN_TOP_RIGHT, -3 , 3);
@@ -267,64 +268,64 @@ void lv_termostato(void) {
     lv_obj_set_style_text_color(labelClock, lv_color_white(), LV_STATE_DEFAULT);
     lv_label_set_text_fmt(labelClock, "17:05");
 
-	labelSetValue = lv_label_create(scr1);
-    lv_obj_align_to(labelSetValue, labelClock, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);    
-    lv_obj_set_style_text_font(labelSetValue, &dseg40, LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(labelSetValue, lv_color_white(), LV_STATE_DEFAULT);
-    lv_label_set_text_fmt(labelSetValue, "%02d", 22);
-
-	labelCelsius = lv_label_create(scr1);
-	lv_obj_align_to(labelCelsius, labelFloor, LV_ALIGN_OUT_RIGHT_TOP, 0, 0);
-	lv_obj_set_style_text_font(labelCelsius, &monts15, LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(labelCelsius, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelCelsius, "°C");
-
-	labelConfig = lv_label_create(scr1);
-	lv_obj_align_to(labelConfig, labelSetValue, LV_ALIGN_OUT_LEFT_TOP, 17, 0);
-	lv_obj_set_style_text_color(labelConfig, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelConfig, LV_SYMBOL_SETTINGS);
-
-	labelSet = lv_label_create(scr1);
-	lv_obj_align_to(labelSet, labelConfig, LV_ALIGN_OUT_BOTTOM_LEFT, -10, 10);
-	lv_obj_set_style_text_font(labelSet, &monts15, LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(labelSet, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelSet, "MAIO");
-
-	labelClock2 = lv_img_create(scr1);
-	lv_img_set_src(labelClock2, &clock);
-	lv_obj_set_height(labelClock2, 25);
-	lv_obj_set_width(labelClock2, 25);
-	lv_obj_align_to(labelClock2, labelSetValue, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 15);
-
-	labelFumaca = lv_img_create(scr1);
-	lv_img_set_src(labelFumaca, &fumaca);
-	lv_obj_set_height(labelFumaca, 25);
-	lv_obj_set_width(labelFumaca, 30);
-	lv_obj_align_to(labelFumaca, labelClock2, LV_ALIGN_OUT_RIGHT_MID, 8, -2);
-
-	labelDia = lv_label_create(scr1);
-	lv_obj_align(labelDia, LV_ALIGN_TOP_LEFT, 10, 10);
-	lv_obj_set_style_text_font(labelDia, &monts15, LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(labelDia, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelDia, "SEG");
-
-	labelCelsius2 = lv_label_create(scr1);
-	lv_obj_align_to(labelCelsius2, labelSetValue, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
-	lv_obj_set_style_text_font(labelCelsius2, &monts15, LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(labelCelsius2, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelCelsius2, "°C");
-
-	labelFT = lv_label_create(scr1);
-	lv_obj_align(labelFT, LV_ALIGN_LEFT_MID, 2 , -55);
-	lv_obj_set_style_text_font(labelFT, &monts10, LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(labelFT, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelFT, "FLOOR");
-
-	labelFT2 = lv_label_create(scr1);
-	lv_obj_align_to(labelFT2, labelFT, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 2);
-	lv_obj_set_style_text_font(labelFT2, &monts10, LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(labelFT2, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelFT2, "TEMP");
+// 	labelSetValue = lv_label_create(scr1);
+//     lv_obj_align_to(labelSetValue, labelClock, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);    
+//     lv_obj_set_style_text_font(labelSetValue, &dseg40, LV_STATE_DEFAULT);
+//     lv_obj_set_style_text_color(labelSetValue, lv_color_white(), LV_STATE_DEFAULT);
+//     lv_label_set_text_fmt(labelSetValue, "%02d", 22);
+// 
+// 	labelCelsius = lv_label_create(scr1);
+// 	lv_obj_align_to(labelCelsius, labelFloor, LV_ALIGN_OUT_RIGHT_TOP, 0, 0);
+// 	lv_obj_set_style_text_font(labelCelsius, &monts15, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_text_color(labelCelsius, lv_color_white(), LV_STATE_DEFAULT);
+// 	lv_label_set_text_fmt(labelCelsius, "°C");
+// 
+// 	labelConfig = lv_label_create(scr1);
+// 	lv_obj_align_to(labelConfig, labelSetValue, LV_ALIGN_OUT_LEFT_TOP, 17, 0);
+// 	lv_obj_set_style_text_color(labelConfig, lv_color_white(), LV_STATE_DEFAULT);
+// 	lv_label_set_text_fmt(labelConfig, LV_SYMBOL_SETTINGS);
+// 
+// 	labelSet = lv_label_create(scr1);
+// 	lv_obj_align_to(labelSet, labelConfig, LV_ALIGN_OUT_BOTTOM_LEFT, -10, 10);
+// 	lv_obj_set_style_text_font(labelSet, &monts15, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_text_color(labelSet, lv_color_white(), LV_STATE_DEFAULT);
+// 	lv_label_set_text_fmt(labelSet, "MAIO");
+// 
+// 	labelClock2 = lv_img_create(scr1);
+// 	lv_img_set_src(labelClock2, &clock);
+// 	lv_obj_set_height(labelClock2, 25);
+// 	lv_obj_set_width(labelClock2, 25);
+// 	lv_obj_align_to(labelClock2, labelSetValue, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 15);
+// 
+// 	labelFumaca = lv_img_create(scr1);
+// 	lv_img_set_src(labelFumaca, &fumaca);
+// 	lv_obj_set_height(labelFumaca, 25);
+// 	lv_obj_set_width(labelFumaca, 30);
+// 	lv_obj_align_to(labelFumaca, labelClock2, LV_ALIGN_OUT_RIGHT_MID, 8, -2);
+// 
+// 	labelDia = lv_label_create(scr1);
+// 	lv_obj_align(labelDia, LV_ALIGN_TOP_LEFT, 10, 10);
+// 	lv_obj_set_style_text_font(labelDia, &monts15, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_text_color(labelDia, lv_color_white(), LV_STATE_DEFAULT);
+// 	lv_label_set_text_fmt(labelDia, "SEG");
+// 
+// 	labelCelsius2 = lv_label_create(scr1);
+// 	lv_obj_align_to(labelCelsius2, labelSetValue, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
+// 	lv_obj_set_style_text_font(labelCelsius2, &monts15, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_text_color(labelCelsius2, lv_color_white(), LV_STATE_DEFAULT);
+// 	lv_label_set_text_fmt(labelCelsius2, "°C");
+// 
+// 	labelFT = lv_label_create(scr1);
+// 	lv_obj_align(labelFT, LV_ALIGN_LEFT_MID, 2 , -55);
+// 	lv_obj_set_style_text_font(labelFT, &monts10, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_text_color(labelFT, lv_color_white(), LV_STATE_DEFAULT);
+// 	lv_label_set_text_fmt(labelFT, "FLOOR");
+// 
+// 	labelFT2 = lv_label_create(scr1);
+// 	lv_obj_align_to(labelFT2, labelFT, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 2);
+// 	lv_obj_set_style_text_font(labelFT2, &monts10, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_text_color(labelFT2, lv_color_white(), LV_STATE_DEFAULT);
+// 	lv_label_set_text_fmt(labelFT2, "TEMP");
 }
 
 
@@ -379,7 +380,7 @@ static void task_lcd(void *pvParameters) {
 }
 
 static void task_clock(void *pvParameters) {
-	calendar rtc_initial = {2023, 5, 3, 1, 15, 50, 1};                                            
+	calendar rtc_initial = {2023, 5, 3, 1, 17, 13, 1};                                            
     RTC_init(RTC, ID_RTC, rtc_initial, RTC_IER_ALREN);  
 	uint32_t current_hour, current_min, current_sec;
 	uint32_t current_year, current_month, current_day, current_week;
@@ -472,8 +473,8 @@ void my_input_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
 		data->state = LV_INDEV_STATE_PRESSED;
 	else
 		data->state = LV_INDEV_STATE_RELEASED; 
-	data->point.x = px;
-	data->point.y = py;
+	data->point.x = py;
+	data->point.y = 320 - px;
 }
 
 void configure_lvgl(void) {
@@ -510,6 +511,7 @@ int main(void) {
 
 	/* LCd, touch and lvgl init*/
 	configure_lcd();
+	ili9341_set_orientation(ILI9341_FLIP_Y | ILI9341_SWITCH_XY);
 	configure_touch();
 	configure_lvgl();
 	
