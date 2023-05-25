@@ -29,7 +29,7 @@ LV_IMG_DECLARE(fumaca);
 
 #define MAGNET_PIO		   PIOA
 #define MAGNET_PIO_ID	   ID_PIOA
-#define MAGNET_PIO_IDX	   11  // alterar para 19 quando usar o MAG-NET
+#define MAGNET_PIO_IDX	   19  // alterar para 19 quando usar o MAG-NET
 #define MAGNET_PIO_IDX_MASK (1 << MAGNET_PIO_IDX)
 
 static lv_disp_draw_buf_t disp_buf;
@@ -64,7 +64,7 @@ lv_obj_t * scr2;
 
 volatile char setPower;
 
-volatile float diametro_roda = 2;
+volatile float diametro_roda = 0.508;
 
 #include "arm_math.h"
 
@@ -86,10 +86,10 @@ void RTC_init(Rtc *rtc, uint32_t id_rtc, calendar t, uint32_t irq_type);
 /* RTOS                                                                 */
 /************************************************************************/
 
-#define TASK_LCD_STACK_SIZE                (1024*6/sizeof(portSTACK_TYPE))
+#define TASK_LCD_STACK_SIZE                (1024*4/sizeof(portSTACK_TYPE))
 #define TASK_LCD_STACK_PRIORITY            (tskIDLE_PRIORITY)
 
-#define TASK_MAGNET_STACK_SIZE             (1024*6/sizeof(portSTACK_TYPE))
+#define TASK_MAGNET_STACK_SIZE             (1024*4/sizeof(portSTACK_TYPE))
 #define TASK_MAGNET_STACK_PRIORITY         (tskIDLE_PRIORITY)
 
 extern void vApplicationStackOverflowHook(xTaskHandle *pxTask,  signed char *pcTaskName);
@@ -456,7 +456,8 @@ static void task_simulador(void *pvParameters) {
 
     while(1){
         pio_clear(PIOC, PIO_PC31);
-        delay_ms(1);
+        //delay_ms(1);
+		vTaskDelay(1);
         pio_set(PIOC, PIO_PC31);
 #ifdef RAMP
         if (ramp_up) {
@@ -479,7 +480,8 @@ static void task_simulador(void *pvParameters) {
         f = kmh_to_hz(vel, RAIO);
         int t = 965*(1.0/f); //UTILIZADO 965 como multiplicador ao invés de 1000
                              //para compensar o atraso gerado pelo Escalonador do freeRTOS
-        delay_ms(t);
+        //delay_ms(t);
+		vTaskDelay(t);
     }
 }
 
@@ -597,6 +599,11 @@ int main(void) {
 	if (xTaskCreate(task_magnet, "Magnet", TASK_MAGNET_STACK_SIZE, NULL, TASK_MAGNET_STACK_PRIORITY, NULL) != pdPASS) {
 		printf("Failed to create magnet task\r\n");
 	}
+	
+	if (xTaskCreate(task_simulador, "Simulador", TASK_SIMULATOR_STACK_SIZE, NULL, TASK_SIMULATOR_STACK_PRIORITY, NULL) != pdPASS) {
+		printf("Failed to create simulador task\r\n");
+	}
+	
 
 	/* Start the scheduler. */
 	vTaskStartScheduler();
