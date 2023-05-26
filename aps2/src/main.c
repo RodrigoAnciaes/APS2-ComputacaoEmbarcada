@@ -338,7 +338,7 @@ QueueHandle_t xQueueMagnet;
 volatile uint32_t start_mag = 0;
 
 void magnet_callback(void){
-
+	//printf("Teste");
 	if (start_mag == 0){
 		start_mag = 1;
 		RTT_init(10000, 2353, 0);
@@ -405,12 +405,13 @@ void task_magnet(void *pvParameters){
 		// read the magnet queue
 		if (xQueueReceive(xQueueMagnet, &tempo, portMAX_DELAY) == pdTRUE){
 				tempo_em_segundos = (float)tempo/10000;
-				printf("Tempo em segundos: %f\n", tempo_em_segundos);
+				vTaskDelay(100);
+				//printf("Tempo em segundos: %f\n", tempo_em_segundos);
 				float raio = diametro_roda/2;
-				velocidade = (2*PI*raio)/tempo_em_segundos;
-				printf("Velocidade: %f\n", velocidade);
+				velocidade = (2*PI*raio)*3.6/tempo_em_segundos;
+				//printf("Velocidade: %f Km/h\n", velocidade);
 				aceleracao = (velocidade - ultima_velocidade)/tempo_em_segundos;
-				printf("Aceleracao: %f\n", aceleracao);
+				//printf("Aceleracao: %f\n", aceleracao);
 				ultima_velocidade = velocidade;
 			}
 		}
@@ -456,8 +457,8 @@ static void task_simulador(void *pvParameters) {
 
     while(1){
         pio_clear(PIOC, PIO_PC31);
-        //delay_ms(1);
-		vTaskDelay(1);
+        delay_ms(1);
+		//vTaskDelay(1);
         pio_set(PIOC, PIO_PC31);
 #ifdef RAMP
         if (ramp_up) {
@@ -475,13 +476,14 @@ static void task_simulador(void *pvParameters) {
 	#endif
 #ifndef RAMP
         vel = 5;
-        printf("[SIMU] CONSTANTE: %d \n", (int) (10*vel));
+        //printf("[SIMU] CONSTANTE: %d \n", (int) (10*vel));
 #endif
         f = kmh_to_hz(vel, RAIO);
         int t = 965*(1.0/f); //UTILIZADO 965 como multiplicador ao invés de 1000
                              //para compensar o atraso gerado pelo Escalonador do freeRTOS
-        //delay_ms(t);
-		vTaskDelay(t);
+		printf("Tempo: %d\n", t);						 
+        delay_ms(t);
+		//vTaskDelay(t);
     }
 }
 
