@@ -61,6 +61,9 @@ lv_obj_t * labelFT;
 lv_obj_t * labelFT2;
 lv_obj_t * scr1;
 lv_obj_t * scr2;
+lv_obj_t * labelAceleracao;
+lv_obj_t * labelVelUnity;
+lv_obj_t * labelAcelUnity;
 
 volatile char setPower;
 
@@ -268,6 +271,32 @@ void lv_termostato(void) {
     lv_obj_set_style_text_color(labelClock, lv_color_white(), LV_STATE_DEFAULT);
     lv_label_set_text_fmt(labelClock, "17:05");
 
+	labelVelocidade = lv_label_create(scr1);
+	lv_obj_align_to(labelVelocidade, labelBtn1, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);
+	lv_obj_set_style_text_font(labelVelocidade, &dseg40, LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(labelVelocidade, lv_color_white(), LV_STATE_DEFAULT);
+	lv_label_set_text_fmt(labelVelocidade, "%02d", 22);
+
+	labelAceleracao = lv_label_create(scr1);
+	lv_obj_align_to(labelAceleracao, labelVelocidade, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);
+	lv_obj_set_style_text_font(labelAceleracao, &dseg40, LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(labelAceleracao, lv_color_white(), LV_STATE_DEFAULT);
+	lv_label_set_text_fmt(labelAceleracao, "%02d", 3);
+
+	labelVelUnity = lv_label_create(scr1);
+	lv_obj_align_to(labelVelUnity, labelVelocidade, LV_ALIGN_OUT_RIGHT_TOP, 0, 0);
+	lv_obj_set_style_text_font(labelVelUnity, &dseg15, LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(labelVelUnity, lv_color_white(), LV_STATE_DEFAULT);
+	lv_label_set_text_fmt(labelVelUnity, "km/h");
+
+	labelAcelUnity = lv_label_create(scr1);
+	lv_obj_align_to(labelAcelUnity, labelAceleracao, LV_ALIGN_OUT_RIGHT_TOP, 0, 0);
+	lv_obj_set_style_text_font(labelAcelUnity, &dseg15, LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(labelAcelUnity, lv_color_white(), LV_STATE_DEFAULT);
+	lv_label_set_text_fmt(labelAcelUnity, "km/h/s");
+
+
+
 // 	labelSetValue = lv_label_create(scr1);
 //     lv_obj_align_to(labelSetValue, labelClock, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);    
 //     lv_obj_set_style_text_font(labelSetValue, &dseg40, LV_STATE_DEFAULT);
@@ -424,6 +453,17 @@ void task_magnet(void *pvParameters){
 				aceleracao = (velocidade - ultima_velocidade)/tempo_em_segundos;
 				printf("Aceleracao: %f\n", aceleracao);
 				ultima_velocidade = velocidade;
+				// alterar a velocidade no display
+				xSemaphoreTake(xMutexLVGL, portMAX_DELAY);
+				// formata o texto
+				char velocidade_str[10];
+				sprintf(velocidade_str, "%.2f", velocidade);
+				lv_label_set_text_fmt(labelVelocidade, "%s", velocidade_str);
+				// formata o texto
+				char aceleracao_str[10];
+				sprintf(aceleracao_str, "%.2f", aceleracao);
+				lv_label_set_text_fmt(labelAceleracao, "%s", aceleracao_str);
+				xSemaphoreGive(xMutexLVGL);
 			}
 		}
 
