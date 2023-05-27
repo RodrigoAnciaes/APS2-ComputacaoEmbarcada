@@ -29,7 +29,7 @@ LV_IMG_DECLARE(fumaca);
 
 #define MAGNET_PIO		   PIOA
 #define MAGNET_PIO_ID	   ID_PIOA
-#define MAGNET_PIO_IDX	   19  // alterar para 19 quando usar o MAG-NET
+#define MAGNET_PIO_IDX	   11 // alterar para 19 quando usar o MAG-NET ou para 11 quando usar o botao
 #define MAGNET_PIO_IDX_MASK (1 << MAGNET_PIO_IDX)
 
 static lv_disp_draw_buf_t disp_buf;
@@ -353,13 +353,24 @@ void magnet_callback(void){
 
 }
 
-void MAGNET_INIT(){
-	pmc_enable_periph_clk(MAGNET_PIO_ID);
-	pio_set_input(MAGNET_PIO,MAGNET_PIO_IDX_MASK,PIO_PULLUP);
-	pio_handler_set(MAGNET_PIO, MAGNET_PIO_ID, MAGNET_PIO_IDX_MASK, PIO_IT_RISE_EDGE, magnet_callback);
-	pio_enable_interrupt(MAGNET_PIO, MAGNET_PIO_IDX_MASK);
-	NVIC_EnableIRQ(MAGNET_PIO_ID);
-	NVIC_SetPriority(MAGNET_PIO_ID, 4);
+void MAGNET_INIT(int mode){
+	if (mode == 0){
+		pmc_enable_periph_clk(MAGNET_PIO_ID);
+		pio_set_input(MAGNET_PIO,MAGNET_PIO_IDX_MASK,PIO_PULLUP);
+		pio_handler_set(MAGNET_PIO, MAGNET_PIO_ID, MAGNET_PIO_IDX_MASK, PIO_IT_RISE_EDGE, magnet_callback);
+		pio_enable_interrupt(MAGNET_PIO, MAGNET_PIO_IDX_MASK);
+		NVIC_EnableIRQ(MAGNET_PIO_ID);
+		NVIC_SetPriority(MAGNET_PIO_ID, 4);
+	}
+	else{
+		pmc_enable_periph_clk(MAGNET_PIO_ID);
+		pio_set_input(MAGNET_PIO,MAGNET_PIO_IDX_MASK,PIO_PULLUP | PIO_DEBOUNCE);
+		pio_set_debounce_filter(MAGNET_PIO, MAGNET_PIO_IDX_MASK, 10);
+		pio_handler_set(MAGNET_PIO, MAGNET_PIO_ID, MAGNET_PIO_IDX_MASK, PIO_IT_RISE_EDGE, magnet_callback);
+		pio_enable_interrupt(MAGNET_PIO, MAGNET_PIO_IDX_MASK);
+		NVIC_EnableIRQ(MAGNET_PIO_ID);
+		NVIC_SetPriority(MAGNET_PIO_ID, 4);
+	}
 }
 
 
@@ -406,12 +417,12 @@ void task_magnet(void *pvParameters){
 		if (xQueueReceive(xQueueMagnet, &tempo, portMAX_DELAY) == pdTRUE){
 				tempo_em_segundos = (float)tempo/10000;
 				vTaskDelay(100);
-				//printf("Tempo em segundos: %f\n", tempo_em_segundos);
+				printf("Tempo em segundos: %f\n", tempo_em_segundos);
 				float raio = diametro_roda/2;
 				velocidade = (2*PI*raio)*3.6/tempo_em_segundos;
-				//printf("Velocidade: %f Km/h\n", velocidade);
+				printf("Velocidade: %f Km/h\n", velocidade);
 				aceleracao = (velocidade - ultima_velocidade)/tempo_em_segundos;
-				//printf("Aceleracao: %f\n", aceleracao);
+				printf("Aceleracao: %f\n", aceleracao);
 				ultima_velocidade = velocidade;
 			}
 		}
@@ -457,8 +468,8 @@ static void task_simulador(void *pvParameters) {
 
     while(1){
         pio_clear(PIOC, PIO_PC31);
-        delay_ms(1);
-		//vTaskDelay(1);
+        //delay_ms(1);
+		vTaskDelay(1);
         pio_set(PIOC, PIO_PC31);
 #ifdef RAMP
         if (ramp_up) {
@@ -481,9 +492,9 @@ static void task_simulador(void *pvParameters) {
         f = kmh_to_hz(vel, RAIO);
         int t = 965*(1.0/f); //UTILIZADO 965 como multiplicador ao invés de 1000
                              //para compensar o atraso gerado pelo Escalonador do freeRTOS
-		printf("Tempo: %d\n", t);						 
-        delay_ms(t);
-		//vTaskDelay(t);
+		//printf("Tempo: %d\n", t);						 
+        //delay_ms(t);
+		vTaskDelay(t);
     }
 }
 
@@ -576,7 +587,7 @@ int main(void) {
 	board_init();
 	sysclk_init();
 	configure_console();
-	MAGNET_INIT();
+	MAGNET_INIT(1);
 	/* Disable the watchdog */                                                                      
     WDT->WDT_MR = WDT_MR_WDDIS;  
 
