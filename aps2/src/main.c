@@ -450,7 +450,7 @@ void task_magnet(void *pvParameters){
 				float raio = diametro_roda/2;
 				velocidade = (2*PI*raio)*3.6/tempo_em_segundos;
 				printf("Velocidade: %f Km/h\n", velocidade);
-				aceleracao = (velocidade - ultima_velocidade)/tempo_em_segundos;
+				aceleracao = (velocidade - ultima_velocidade);
 				printf("Aceleracao: %f\n", aceleracao);
 				ultima_velocidade = velocidade;
 				// alterar a velocidade no display
