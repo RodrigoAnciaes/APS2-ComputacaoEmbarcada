@@ -50,6 +50,8 @@ lv_obj_t * labelFloorDigit;
 lv_obj_t * labelSetValue;
 lv_obj_t * labelClock;
 lv_obj_t * labelVelocidade;
+lv_obj_t * labelVelEscrita;
+lv_obj_t * labelAcelEscrita;
 lv_obj_t * labelChave;
 lv_obj_t * labelHome;
 lv_obj_t * labelCelsius;
@@ -206,7 +208,7 @@ static void iniciar_handler(lv_event_t * e) {
 		if (flagTrajeto == 0){
 			flagTrajeto = 1;
 			// alterar o texto do botao para pausar
-			lv_label_set_text_fmt(labelBtn7, LV_SYMBOL_STOP);
+			lv_label_set_text_fmt(labelBtn7, LV_SYMBOL_PAUSE);
 		}
 		else{
 			flagTrajeto = 0;
@@ -249,7 +251,7 @@ void lv_termostato(void) {
     lv_obj_add_event_cb(btn1, event_handler, LV_EVENT_ALL, NULL);
     lv_obj_align(btn1, LV_ALIGN_TOP_LEFT, 3, -3);
     labelBtn1 = lv_label_create(btn1);
-	lv_label_set_text(labelBtn1, "[  "LV_SYMBOL_POWER" ]");
+	lv_label_set_text(labelBtn1, LV_SYMBOL_POWER);
     lv_obj_center(labelBtn1);
 	lv_obj_add_style(btn1, &style, 0);
 	
@@ -264,18 +266,18 @@ void lv_termostato(void) {
 	lv_obj_t * btn7 = lv_btn_create(scr1);
 	lv_obj_add_event_cb(btn7, iniciar_handler, LV_EVENT_ALL, NULL);
 	// alinha no canto inferior esquerdo
-	lv_obj_align(btn7, LV_ALIGN_BOTTOM_LEFT, 20, -20);
+	lv_obj_align(btn7, LV_ALIGN_BOTTOM_LEFT, 10, -10);
 	labelBtn7 = lv_label_create(btn7);
-	lv_label_set_text(labelBtn7, "[  "LV_SYMBOL_PLAY" ]");
+	lv_label_set_text(labelBtn7, LV_SYMBOL_PLAY);
 	lv_obj_center(labelBtn7);
 	lv_obj_add_style(btn7, &style, 0);
 
 	lv_obj_t * btn8 = lv_btn_create(scr1);
 	lv_obj_add_event_cb(btn8, reiniciar_handler, LV_EVENT_ALL, NULL);
 	// alinha no canto inferior direito
-	lv_obj_align(btn8, LV_ALIGN_BOTTOM_RIGHT, -20, -20);
+	lv_obj_align(btn8, LV_ALIGN_BOTTOM_RIGHT, -10, -10);
 	labelBtn8 = lv_label_create(btn8);
-	lv_label_set_text(labelBtn8, "[  "LV_SYMBOL_REFRESH" ]");
+	lv_label_set_text(labelBtn8, LV_SYMBOL_REFRESH);
 	lv_obj_center(labelBtn8);
 	lv_obj_add_style(btn8, &style, 0);
 
@@ -340,34 +342,41 @@ void lv_termostato(void) {
     lv_obj_set_style_text_color(labelClock, lv_color_white(), LV_STATE_DEFAULT);
     lv_label_set_text_fmt(labelClock, "17:05");
 
+	labelVelEscrita = lv_label_create(scr1);
+	lv_obj_align_to(labelVelEscrita, labelBtn1, LV_ALIGN_OUT_BOTTOM_MID, 10, 30);
+	lv_obj_set_style_text_color(labelVelEscrita, lv_color_white(), LV_STATE_DEFAULT);
+	lv_label_set_text_fmt(labelVelEscrita, "vel =           km/h");
+
 	labelVelocidade = lv_label_create(scr1);
-	lv_obj_align_to(labelVelocidade, labelBtn1, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);
+	lv_obj_align_to(labelVelocidade, labelVelEscrita, LV_ALIGN_RIGHT_MID, -60, 5);
 	lv_obj_set_style_text_font(labelVelocidade, &dseg15, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(labelVelocidade, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelVelocidade, "%02d", 0);
 
-	// adiciona a label de unidade de velocidade ao lado direito da label de velocidade
-	labelVelUnity = lv_label_create(scr1);
-	lv_obj_align_to(labelVelUnity, labelVelocidade, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
-	lv_obj_set_style_text_font(labelVelUnity, &dseg10, LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(labelVelUnity, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelVelUnity, "velocidade (km/h)");
+// 	// adiciona a label de unidade de velocidade ao lado direito da label de velocidade
+// 	labelVelUnity = lv_label_create(scr1);
+// 	lv_obj_align_to(labelVelUnity, labelVelocidade, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
+// 	lv_obj_set_style_text_font(labelVelUnity, &dseg10, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_text_color(labelVelUnity, lv_color_white(), LV_STATE_DEFAULT);
+// 	lv_label_set_text_fmt(labelVelUnity, "velocidade (km/h)");
 
-
+	labelAcelEscrita = lv_label_create(scr1);
+	lv_obj_align_to(labelAcelEscrita, labelVelEscrita, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20);
+	lv_obj_set_style_text_color(labelAcelEscrita, lv_color_white(), LV_STATE_DEFAULT);
+	lv_label_set_text_fmt(labelAcelEscrita, "acel =           km/h2");
 
 	labelAceleracao = lv_label_create(scr1);
-	lv_obj_align_to(labelAceleracao, labelVelocidade, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);
+	lv_obj_align_to(labelAceleracao, labelAcelEscrita, LV_ALIGN_RIGHT_MID, -80, 5);
 	lv_obj_set_style_text_font(labelAceleracao, &dseg15, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(labelAceleracao, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelAceleracao, "%02d", 0);
 
-	// adiciona a label de unidade de aceleracao ao lado direito da label de aceleracao
-	labelAcelUnity = lv_label_create(scr1);
-	lv_obj_align_to(labelAcelUnity, labelAceleracao, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
-	lv_obj_set_style_text_font(labelAcelUnity, &dseg10, LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(labelAcelUnity, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelAcelUnity, "aceleracao (km/h/s)");
-
+// 	// adiciona a label de unidade de aceleracao ao lado direito da label de aceleracao
+// 	labelAcelUnity = lv_label_create(scr1);
+// 	lv_obj_align_to(labelAcelUnity, labelAceleracao, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
+// 	lv_obj_set_style_text_font(labelAcelUnity, &dseg10, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_text_color(labelAcelUnity, lv_color_white(), LV_STATE_DEFAULT);
+// 	lv_label_set_text_fmt(labelAcelUnity, "aceleracao (km/h/s)");
 
 
 	labelVelMedia = lv_label_create(scr1);
@@ -376,13 +385,12 @@ void lv_termostato(void) {
 	lv_obj_set_style_text_color(labelVelMedia, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelVelMedia, "0");
 
-	// adiciona a label de unidade de velocidade media ao lado direito da label de velocidade media
-	labelVelMediaUnity = lv_label_create(scr1);
-	lv_obj_align_to(labelVelMediaUnity, labelVelMedia, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
-	lv_obj_set_style_text_font(labelVelMediaUnity, &dseg10, LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(labelVelMediaUnity, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelVelMediaUnity, "velocidade media (km/h)");
-
+// 	// adiciona a label de unidade de velocidade media ao lado direito da label de velocidade media
+// 	labelVelMediaUnity = lv_label_create(scr1);
+// 	lv_obj_align_to(labelVelMediaUnity, labelVelMedia, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
+// 	lv_obj_set_style_text_font(labelVelMediaUnity, &dseg10, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_text_color(labelVelMediaUnity, lv_color_white(), LV_STATE_DEFAULT);
+// 	lv_label_set_text_fmt(labelVelMediaUnity, "velocidade media (km/h)");
 
 
 	labelTempo = lv_label_create(scr1);
@@ -391,14 +399,12 @@ void lv_termostato(void) {
 	lv_obj_set_style_text_color(labelTempo, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelTempo, "0");
 
-	// adiciona a label de unidade de tempo ao lado direito da label de tempo
-	labelTempoUnity = lv_label_create(scr1);
-	lv_obj_align_to(labelTempoUnity, labelTempo, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
-	lv_obj_set_style_text_font(labelTempoUnity, &dseg10, LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(labelTempoUnity, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelTempoUnity, "tempo (s)");
-
-
+// 	// adiciona a label de unidade de tempo ao lado direito da label de tempo
+// 	labelTempoUnity = lv_label_create(scr1);
+// 	lv_obj_align_to(labelTempoUnity, labelTempo, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
+// 	lv_obj_set_style_text_font(labelTempoUnity, &dseg10, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_text_color(labelTempoUnity, lv_color_white(), LV_STATE_DEFAULT);
+// 	lv_label_set_text_fmt(labelTempoUnity, "tempo (s)");
 
 
 	labelDistancia = lv_label_create(scr1);
@@ -407,12 +413,12 @@ void lv_termostato(void) {
 	lv_obj_set_style_text_color(labelDistancia, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelDistancia, "0");
 
-	// adiciona a label de unidade de distancia ao lado direito da label de distancia
-	labelDistanciaUnity = lv_label_create(scr1);
-	lv_obj_align_to(labelDistanciaUnity, labelDistancia, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
-	lv_obj_set_style_text_font(labelDistanciaUnity, &dseg10, LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(labelDistanciaUnity, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelDistanciaUnity, "distancia (m)");
+// 	// adiciona a label de unidade de distancia ao lado direito da label de distancia
+// 	labelDistanciaUnity = lv_label_create(scr1);
+// 	lv_obj_align_to(labelDistanciaUnity, labelDistancia, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
+// 	lv_obj_set_style_text_font(labelDistanciaUnity, &dseg10, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_text_color(labelDistanciaUnity, lv_color_white(), LV_STATE_DEFAULT);
+// 	lv_label_set_text_fmt(labelDistanciaUnity, "distancia (m)");
 
 
 
