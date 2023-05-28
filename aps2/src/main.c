@@ -413,8 +413,7 @@ void lv_termostato(void) {
 	lv_obj_set_style_text_font(labelDistanciaUnity, &dseg10, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(labelDistanciaUnity, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelDistanciaUnity, "distancia (m)");
-	
-	
+
 
 
 
@@ -553,11 +552,12 @@ static void task_clock(void *pvParameters) {
 		lv_label_set_text_fmt(labelClock, "%02d %02d", current_hour, current_min);
 		if (flagTrajeto == 1){
 		tempoPercorrido++;
-		}
 		lv_label_set_text_fmt(labelTempo, "%02d:%02d:%02d", tempoPercorrido/3600, (tempoPercorrido%3600)/60, tempoPercorrido%60);
+		}
 		vTaskDelay(1000);
 		if (flagTrajeto == 1){
 		tempoPercorrido++;
+		lv_label_set_text_fmt(labelTempo, "%02d:%02d:%02d", tempoPercorrido/3600, (tempoPercorrido%3600)/60, tempoPercorrido%60);
 		}
 	}
 }
@@ -593,8 +593,8 @@ void task_magnet(void *pvParameters){
 				lv_label_set_text_fmt(labelAceleracao, "%s", aceleracao_str);
 				xSemaphoreGive(xMutexLVGL);
 				if (flagTrajeto == 1){
-					// calcula a distancia percorrida
-					distanciaPercorrida += (velocidade/3600)*tempo_em_segundos;
+					// calcula a distancia percorrida em km
+					distanciaPercorrida += (2*PI*raio)/1000;
 					// alterar a distancia no display
 					xSemaphoreTake(xMutexLVGL, portMAX_DELAY);
 					// formata o texto
@@ -604,7 +604,7 @@ void task_magnet(void *pvParameters){
 					xSemaphoreGive(xMutexLVGL);
 
 					// calcula a velocidade media
-					velocidadeMedia = (distanciaPercorrida*3600)/tempoPercorrido;
+					velocidadeMedia = velocidadeMedia + (velocidade - velocidadeMedia)/2;
 					// alterar a velocidade media no display
 					xSemaphoreTake(xMutexLVGL, portMAX_DELAY);
 					// formata o texto
