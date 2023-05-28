@@ -43,6 +43,8 @@ static  lv_obj_t * labelBtn3;
 static  lv_obj_t * labelBtn4;
 static  lv_obj_t * labelBtn5;
 static  lv_obj_t * labelBtn6;
+static  lv_obj_t * labelBtn7;
+static  lv_obj_t * labelBtn8;
 lv_obj_t * labelFloor;
 lv_obj_t * labelFloorDigit;
 lv_obj_t * labelSetValue;
@@ -64,10 +66,24 @@ lv_obj_t * scr2;
 lv_obj_t * labelAceleracao;
 lv_obj_t * labelVelUnity;
 lv_obj_t * labelAcelUnity;
+lv_obj_t * labelTempo;
+lv_obj_t * labelDistancia;
+lv_obj_t * labelTempoUnity;
+lv_obj_t * labelDistanciaUnity;
+lv_obj_t * labelVelMedia;
+lv_obj_t * labelVelMediaUnity;
 
 volatile char setPower;
 
 volatile float diametro_roda = 0.508;
+
+volatile float velocidadeMedia = 0;
+
+volatile float distanciaPercorrida = 0;
+
+volatile uint32_t tempoPercorrido = 0;
+
+volatile uint32_t flagTrajeto = 0;
 
 #include "arm_math.h"
 
@@ -183,6 +199,40 @@ static void up_handler(lv_event_t * e) {
 //     }
 }
 
+static void iniciar_handler(lv_event_t * e) {
+	// handler para o botao de iniciar que inicia um trajeto ou pausa um trajeto
+	lv_event_code_t code = lv_event_get_code(e);
+	if(code == LV_EVENT_CLICKED) {
+		if (flagTrajeto == 0){
+			flagTrajeto = 1;
+			// alterar o texto do botao para pausar
+			lv_label_set_text_fmt(labelBtn7, LV_SYMBOL_STOP);
+		}
+		else{
+			flagTrajeto = 0;
+			// alterar o texto do botao para iniciar
+			lv_label_set_text_fmt(labelBtn7, LV_SYMBOL_PLAY);
+		}
+	}
+}
+
+static void reiniciar_handler(lv_event_t * e) {
+	// handler para o botao de reiniciar que reinicia um trajeto
+	lv_event_code_t code = lv_event_get_code(e);
+	if(code == LV_EVENT_CLICKED) {
+		// reinicia as variaveis de trajeto
+		velocidadeMedia = 0;
+		distanciaPercorrida = 0;
+		tempoPercorrido = 0;
+		// atualiza os labels
+		// mutex
+		lv_label_set_text_fmt(labelVelMedia, "%02d", velocidadeMedia);
+		lv_label_set_text_fmt(labelDistancia, "%02d", distanciaPercorrida);
+		lv_label_set_text_fmt(labelTempo, "%02d:%02d:%02d", tempoPercorrido/3600, (tempoPercorrido%3600)/60, tempoPercorrido%60);
+
+	}
+}
+
 void lv_termostato(void) {
 	static lv_style_t style;
     lv_style_init(&style);
@@ -210,6 +260,25 @@ void lv_termostato(void) {
 	lv_label_set_text(labelBtn6, LV_SYMBOL_POWER);
 	lv_obj_center(labelBtn6);
 	lv_obj_add_style(btn6, &style, 0);
+
+	lv_obj_t * btn7 = lv_btn_create(scr1);
+	lv_obj_add_event_cb(btn7, iniciar_handler, LV_EVENT_ALL, NULL);
+	// alinha no canto inferior esquerdo
+	lv_obj_align(btn7, LV_ALIGN_BOTTOM_LEFT, 20, -20);
+	labelBtn7 = lv_label_create(btn7);
+	lv_label_set_text(labelBtn7, "[  "LV_SYMBOL_PLAY" ]");
+	lv_obj_center(labelBtn7);
+	lv_obj_add_style(btn7, &style, 0);
+
+	lv_obj_t * btn8 = lv_btn_create(scr1);
+	lv_obj_add_event_cb(btn8, reiniciar_handler, LV_EVENT_ALL, NULL);
+	// alinha no canto inferior direito
+	lv_obj_align(btn8, LV_ALIGN_BOTTOM_RIGHT, -20, -20);
+	labelBtn8 = lv_label_create(btn8);
+	lv_label_set_text(labelBtn8, "[  "LV_SYMBOL_REFRESH" ]");
+	lv_obj_center(labelBtn8);
+	lv_obj_add_style(btn8, &style, 0);
+
 
 // 	lv_obj_t * btn2 = lv_btn_create(scr1);
 //     lv_obj_add_event_cb(btn2, but2_callback, LV_EVENT_ALL, NULL);
@@ -273,27 +342,38 @@ void lv_termostato(void) {
 
 	labelVelocidade = lv_label_create(scr1);
 	lv_obj_align_to(labelVelocidade, labelBtn1, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);
-	lv_obj_set_style_text_font(labelVelocidade, &dseg40, LV_STATE_DEFAULT);
+	lv_obj_set_style_text_font(labelVelocidade, &dseg25, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(labelVelocidade, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelVelocidade, "%02d", 22);
+	lv_label_set_text_fmt(labelVelocidade, "%02d", 0);
 
 	labelAceleracao = lv_label_create(scr1);
 	lv_obj_align_to(labelAceleracao, labelVelocidade, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);
-	lv_obj_set_style_text_font(labelAceleracao, &dseg40, LV_STATE_DEFAULT);
+	lv_obj_set_style_text_font(labelAceleracao, &dseg25, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(labelAceleracao, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelAceleracao, "%02d", 3);
+	lv_label_set_text_fmt(labelAceleracao, "%02d", 0);
 
-	labelVelUnity = lv_label_create(scr1);
-	lv_obj_align_to(labelVelUnity, labelVelocidade, LV_ALIGN_OUT_RIGHT_TOP, 0, 0);
-	lv_obj_set_style_text_font(labelVelUnity, &dseg15, LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(labelVelUnity, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelVelUnity, "km/h");
 
-	labelAcelUnity = lv_label_create(scr1);
-	lv_obj_align_to(labelAcelUnity, labelAceleracao, LV_ALIGN_OUT_RIGHT_TOP, 0, 0);
-	lv_obj_set_style_text_font(labelAcelUnity, &dseg15, LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(labelAcelUnity, lv_color_white(), LV_STATE_DEFAULT);
-	lv_label_set_text_fmt(labelAcelUnity, "km/h/s");
+	labelVelMedia = lv_label_create(scr1);
+	lv_obj_align_to(labelVelMedia, labelAceleracao, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);
+	lv_obj_set_style_text_font(labelVelMedia, &dseg25, LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(labelVelMedia, lv_color_white(), LV_STATE_DEFAULT);
+	lv_label_set_text_fmt(labelVelMedia, "0");
+
+
+	labelTempo = lv_label_create(scr1);
+	lv_obj_align_to(labelTempo, labelVelMedia, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);
+	lv_obj_set_style_text_font(labelTempo, &dseg25, LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(labelTempo, lv_color_white(), LV_STATE_DEFAULT);
+	lv_label_set_text_fmt(labelTempo, "0");
+
+
+
+	labelDistancia = lv_label_create(scr1);
+	lv_obj_align_to(labelDistancia, labelTempo, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);
+	lv_obj_set_style_text_font(labelDistancia, &dseg25, LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(labelDistancia, lv_color_white(), LV_STATE_DEFAULT);
+	lv_label_set_text_fmt(labelDistancia, "0");
+	
 
 
 
@@ -430,7 +510,14 @@ static void task_clock(void *pvParameters) {
 		lv_label_set_text_fmt(labelClock, "%02d:%02d", current_hour, current_min);
 		vTaskDelay(1000);
 		lv_label_set_text_fmt(labelClock, "%02d %02d", current_hour, current_min);
+		if (flagTrajeto == 1){
+		tempoPercorrido++;
+		}
+		lv_label_set_text_fmt(labelTempo, "%02d:%02d:%02d", tempoPercorrido/3600, (tempoPercorrido%3600)/60, tempoPercorrido%60);
 		vTaskDelay(1000);
+		if (flagTrajeto == 1){
+		tempoPercorrido++;
+		}
 	}
 }
 
@@ -464,6 +551,31 @@ void task_magnet(void *pvParameters){
 				sprintf(aceleracao_str, "%.2f", aceleracao);
 				lv_label_set_text_fmt(labelAceleracao, "%s", aceleracao_str);
 				xSemaphoreGive(xMutexLVGL);
+				if (flagTrajeto == 1){
+					// calcula a distancia percorrida
+					distanciaPercorrida += (velocidade/3600)*tempo_em_segundos;
+					// alterar a distancia no display
+					xSemaphoreTake(xMutexLVGL, portMAX_DELAY);
+					// formata o texto
+					char distancia_str[10];
+					sprintf(distancia_str, "%.2f", distanciaPercorrida);
+					lv_label_set_text_fmt(labelDistancia, "%s", distancia_str);
+					xSemaphoreGive(xMutexLVGL);
+
+					// calcula a velocidade media
+					velocidadeMedia = (distanciaPercorrida*3600)/tempoPercorrido;
+					// alterar a velocidade media no display
+					xSemaphoreTake(xMutexLVGL, portMAX_DELAY);
+					// formata o texto
+					char velocidadeMedia_str[10];
+					sprintf(velocidadeMedia_str, "%.2f", velocidadeMedia);
+					lv_label_set_text_fmt(labelVelMedia, "%s", velocidadeMedia_str);
+					xSemaphoreGive(xMutexLVGL);
+
+					printf("Distancia percorrida: %f\n", distanciaPercorrida);
+					printf("Velocidade media: %f\n", velocidadeMedia);
+					printf("Tempo percorrido: %d\n", tempoPercorrido);
+				}
 			}
 		}
 
