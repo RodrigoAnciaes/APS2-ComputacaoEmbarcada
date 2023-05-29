@@ -52,6 +52,9 @@ lv_obj_t * labelClock;
 lv_obj_t * labelVelocidade;
 lv_obj_t * labelVelEscrita;
 lv_obj_t * labelAcelEscrita;
+lv_obj_t * labelVelMedEscrita;
+lv_obj_t * labelTempoEscrita;
+lv_obj_t * labelDistanciaEscrita;
 lv_obj_t * labelChave;
 lv_obj_t * labelHome;
 lv_obj_t * labelCelsius;
@@ -343,12 +346,12 @@ void lv_termostato(void) {
     lv_label_set_text_fmt(labelClock, "17:05");
 
 	labelVelEscrita = lv_label_create(scr1);
-	lv_obj_align_to(labelVelEscrita, labelBtn1, LV_ALIGN_OUT_BOTTOM_MID, 10, 30);
+	lv_obj_align_to(labelVelEscrita, labelBtn1, LV_ALIGN_OUT_BOTTOM_MID, 5, 20);
 	lv_obj_set_style_text_color(labelVelEscrita, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelVelEscrita, "vel =           km/h");
 
 	labelVelocidade = lv_label_create(scr1);
-	lv_obj_align_to(labelVelocidade, labelVelEscrita, LV_ALIGN_RIGHT_MID, -60, 5);
+	lv_obj_align_to(labelVelocidade, labelVelEscrita, LV_ALIGN_RIGHT_MID, -65, 5);
 	lv_obj_set_style_text_font(labelVelocidade, &dseg15, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(labelVelocidade, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelVelocidade, "%02d", 0);
@@ -361,12 +364,12 @@ void lv_termostato(void) {
 // 	lv_label_set_text_fmt(labelVelUnity, "velocidade (km/h)");
 
 	labelAcelEscrita = lv_label_create(scr1);
-	lv_obj_align_to(labelAcelEscrita, labelVelEscrita, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20);
+	lv_obj_align_to(labelAcelEscrita, labelVelEscrita, LV_ALIGN_OUT_BOTTOM_LEFT, -4, 15);
 	lv_obj_set_style_text_color(labelAcelEscrita, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelAcelEscrita, "acel =           km/h2");
 
 	labelAceleracao = lv_label_create(scr1);
-	lv_obj_align_to(labelAceleracao, labelAcelEscrita, LV_ALIGN_RIGHT_MID, -80, 5);
+	lv_obj_align_to(labelAceleracao, labelAcelEscrita, LV_ALIGN_RIGHT_MID, -86, 5);
 	lv_obj_set_style_text_font(labelAceleracao, &dseg15, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(labelAceleracao, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelAceleracao, "%02d", 0);
@@ -378,9 +381,13 @@ void lv_termostato(void) {
 // 	lv_obj_set_style_text_color(labelAcelUnity, lv_color_white(), LV_STATE_DEFAULT);
 // 	lv_label_set_text_fmt(labelAcelUnity, "aceleracao (km/h/s)");
 
+	labelVelMedEscrita = lv_label_create(scr1);
+	lv_obj_align_to(labelVelMedEscrita, labelAcelEscrita, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 15);
+	lv_obj_set_style_text_color(labelVelMedEscrita, lv_color_white(), LV_STATE_DEFAULT);
+	lv_label_set_text_fmt(labelVelMedEscrita, "vel med =         km/h");
 
 	labelVelMedia = lv_label_create(scr1);
-	lv_obj_align_to(labelVelMedia, labelAceleracao, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);
+	lv_obj_align_to(labelVelMedia, labelVelMedEscrita, LV_ALIGN_RIGHT_MID, -63, 5);
 	lv_obj_set_style_text_font(labelVelMedia, &dseg15, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(labelVelMedia, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelVelMedia, "0");
@@ -392,9 +399,13 @@ void lv_termostato(void) {
 // 	lv_obj_set_style_text_color(labelVelMediaUnity, lv_color_white(), LV_STATE_DEFAULT);
 // 	lv_label_set_text_fmt(labelVelMediaUnity, "velocidade media (km/h)");
 
+	labelTempoEscrita = lv_label_create(scr1);
+	lv_obj_align_to(labelTempoEscrita, labelVelMedEscrita, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 15);
+	lv_obj_set_style_text_color(labelTempoEscrita, lv_color_white(), LV_STATE_DEFAULT);
+	lv_label_set_text_fmt(labelTempoEscrita, "tempo = ");
 
 	labelTempo = lv_label_create(scr1);
-	lv_obj_align_to(labelTempo, labelVelMedia, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);
+	lv_obj_align_to(labelTempo, labelTempoEscrita, LV_ALIGN_RIGHT_MID, 60, 5);
 	lv_obj_set_style_text_font(labelTempo, &dseg15, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(labelTempo, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelTempo, "0");
@@ -406,9 +417,13 @@ void lv_termostato(void) {
 // 	lv_obj_set_style_text_color(labelTempoUnity, lv_color_white(), LV_STATE_DEFAULT);
 // 	lv_label_set_text_fmt(labelTempoUnity, "tempo (s)");
 
-
+	labelDistanciaEscrita = lv_label_create(scr1);
+	lv_obj_align_to(labelDistanciaEscrita, labelTempoEscrita, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 15);
+	lv_obj_set_style_text_color(labelDistanciaEscrita, lv_color_white(), LV_STATE_DEFAULT);
+	lv_label_set_text_fmt(labelDistanciaEscrita, "dist =              km");
+	
 	labelDistancia = lv_label_create(scr1);
-	lv_obj_align_to(labelDistancia, labelTempo, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);
+	lv_obj_align_to(labelDistancia, labelDistanciaEscrita, LV_ALIGN_RIGHT_MID, -45, 5);
 	lv_obj_set_style_text_font(labelDistancia, &dseg15, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(labelDistancia, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelDistancia, "0");
