@@ -29,7 +29,7 @@ LV_IMG_DECLARE(fumaca);
 
 #define MAGNET_PIO		   PIOA
 #define MAGNET_PIO_ID	   ID_PIOA
-#define MAGNET_PIO_IDX	   11 // alterar para 19 quando usar o MAG-NET ou para 11 quando usar o botao
+#define MAGNET_PIO_IDX	   19 // alterar para 19 quando usar o MAG-NET ou para 11 quando usar o botao
 #define MAGNET_PIO_IDX_MASK (1 << MAGNET_PIO_IDX)
 
 static lv_disp_draw_buf_t disp_buf;
@@ -80,7 +80,7 @@ lv_obj_t * labelVelMediaUnity;
 
 volatile char setPower;
 
-volatile float diametro_roda = 0.508;
+volatile float diametro_roda = 0.508; // em metros
 
 volatile float velocidadeMedia = 0;
 
@@ -183,25 +183,9 @@ static void but3_callback(lv_event_t * e) {
 }
 
 static void down_handler(lv_event_t * e) {
-//     lv_event_code_t code = lv_event_get_code(e);
-//     char *c;
-//     int temp;
-//     if(code == LV_EVENT_CLICKED) {
-//         c = lv_label_get_text(labelSetValue);
-//         temp = atoi(c);
-//         lv_label_set_text_fmt(labelSetValue, "%02d", temp - 1);
-//     }
 }
 
 static void up_handler(lv_event_t * e) {
-//     lv_event_code_t code = lv_event_get_code(e);
-//     char *c;
-//     int temp;
-//     if(code == LV_EVENT_CLICKED) {
-//         c = lv_label_get_text(labelSetValue);
-//         temp = atoi(c);
-//         lv_label_set_text_fmt(labelSetValue, "%02d", temp + 1);
-//     }
 }
 
 static void iniciar_handler(lv_event_t * e) {
@@ -285,59 +269,7 @@ void lv_termostato(void) {
 	lv_obj_add_style(btn8, &style, 0);
 
 
-// 	lv_obj_t * btn2 = lv_btn_create(scr1);
-//     lv_obj_add_event_cb(btn2, but2_callback, LV_EVENT_ALL, NULL);
-// 	lv_obj_align_to(btn2, btn1, LV_ALIGN_OUT_RIGHT_TOP, -5, 0);
-//     labelBtn2 = lv_label_create(btn2);
-// 	lv_label_set_text(labelBtn2, "| M |" );
-//     lv_obj_center(labelBtn2);
-// 	lv_obj_add_style(btn2, &style, 0);
-// 
-// 	lv_obj_t * btn3 = lv_imgbtn_create(scr1);
-// 	lv_imgbtn_set_src(btn3, LV_IMGBTN_STATE_RELEASED, 0, &clock, 0);
-// 	lv_obj_add_flag(btn3, LV_OBJ_FLAG_CHECKABLE);
-// 	lv_obj_add_event_cb(btn3, but3_callback, LV_EVENT_ALL, NULL);
-// 	lv_obj_set_height(btn3, 25);
-// 	lv_obj_set_width(btn3, 25);
-// 	lv_obj_align_to(btn3, btn2, LV_ALIGN_OUT_RIGHT_TOP, 3, 9);
-// 
-// 	labelChave = lv_label_create(scr1);
-// 	lv_obj_align_to(labelChave, btn3, LV_ALIGN_OUT_RIGHT_MID, 0, -3);
-// 	lv_obj_set_style_text_color(labelChave, lv_color_white(), LV_STATE_DEFAULT);
-// 	lv_label_set_text_fmt(labelChave, "  ]");
-// 
-// 	labelHome = lv_label_create(scr1);
-// 	lv_obj_align_to(labelHome, labelChave, LV_ALIGN_OUT_RIGHT_MID, 0, -30);
-// 	lv_obj_set_style_text_color(labelHome, lv_color_white(), LV_STATE_DEFAULT);
-// 	lv_label_set_text_fmt(labelHome, LV_SYMBOL_HOME"");
-// 
-// 	lv_obj_t * btn4 = lv_btn_create(scr1);
-//     lv_obj_add_event_cb(btn4, up_handler, LV_EVENT_ALL, NULL);
-// 	lv_obj_align_to(btn4, labelChave, LV_ALIGN_OUT_RIGHT_TOP, 20, -7);
-//     labelBtn4 = lv_label_create(btn4);
-// 	lv_label_set_text(labelBtn4, "[ "LV_SYMBOL_UP"  |");
-//     lv_obj_center(labelBtn4);
-// 	lv_obj_add_style(btn4, &style, 0);
-// 
-// 	lv_obj_t * btn5 = lv_btn_create(scr1);
-//     lv_obj_add_event_cb(btn5, down_handler, LV_EVENT_ALL, NULL);
-// 	lv_obj_align_to(btn5, btn4, LV_ALIGN_OUT_RIGHT_TOP, -5, 0);
-//     labelBtn5 = lv_label_create(btn5);
-// 	lv_label_set_text(labelBtn5, LV_SYMBOL_DOWN"  ]");
-//     lv_obj_center(labelBtn5);
-// 	lv_obj_add_style(btn5, &style, 0);
-// 
-// 	labelFloor = lv_label_create(scr1);
-//     lv_obj_align(labelFloor, LV_ALIGN_LEFT_MID, 35 , -25);
-//     lv_obj_set_style_text_font(labelFloor, &dseg70, LV_STATE_DEFAULT);
-//     lv_obj_set_style_text_color(labelFloor, lv_color_white(), LV_STATE_DEFAULT);
-//     lv_label_set_text_fmt(labelFloor, "%02d", 23);
-// 
-// 	labelFloorDigit = lv_label_create(scr1);
-//     lv_obj_align_to(labelFloorDigit, labelFloor, LV_ALIGN_OUT_RIGHT_BOTTOM, 0, -15);
-//     lv_obj_set_style_text_font(labelFloorDigit, &dseg40, LV_STATE_DEFAULT);
-//     lv_obj_set_style_text_color(labelFloorDigit, lv_color_white(), LV_STATE_DEFAULT);
-//     lv_label_set_text_fmt(labelFloorDigit, ".%d", 4);
+
 
 	labelClock = lv_label_create(scr1);
 	lv_obj_align(labelClock, LV_ALIGN_TOP_RIGHT, -3 , 3);
@@ -356,12 +288,7 @@ void lv_termostato(void) {
 	lv_obj_set_style_text_color(labelVelocidade, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelVelocidade, "%02d", 0);
 
-// 	// adiciona a label de unidade de velocidade ao lado direito da label de velocidade
-// 	labelVelUnity = lv_label_create(scr1);
-// 	lv_obj_align_to(labelVelUnity, labelVelocidade, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
-// 	lv_obj_set_style_text_font(labelVelUnity, &dseg10, LV_STATE_DEFAULT);
-// 	lv_obj_set_style_text_color(labelVelUnity, lv_color_white(), LV_STATE_DEFAULT);
-// 	lv_label_set_text_fmt(labelVelUnity, "velocidade (km/h)");
+
 
 	labelAcelEscrita = lv_label_create(scr1);
 	lv_obj_align_to(labelAcelEscrita, labelVelEscrita, LV_ALIGN_OUT_BOTTOM_LEFT, -4, 15);
@@ -428,74 +355,9 @@ void lv_termostato(void) {
 	lv_obj_set_style_text_color(labelDistancia, lv_color_white(), LV_STATE_DEFAULT);
 	lv_label_set_text_fmt(labelDistancia, "0");
 
-// 	// adiciona a label de unidade de distancia ao lado direito da label de distancia
-// 	labelDistanciaUnity = lv_label_create(scr1);
-// 	lv_obj_align_to(labelDistanciaUnity, labelDistancia, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
-// 	lv_obj_set_style_text_font(labelDistanciaUnity, &dseg10, LV_STATE_DEFAULT);
-// 	lv_obj_set_style_text_color(labelDistanciaUnity, lv_color_white(), LV_STATE_DEFAULT);
-// 	lv_label_set_text_fmt(labelDistanciaUnity, "distancia (m)");
 
 
 
-
-// 	labelSetValue = lv_label_create(scr1);
-//     lv_obj_align_to(labelSetValue, labelClock, LV_ALIGN_OUT_BOTTOM_LEFT, 3, 30);    
-//     lv_obj_set_style_text_font(labelSetValue, &dseg40, LV_STATE_DEFAULT);
-//     lv_obj_set_style_text_color(labelSetValue, lv_color_white(), LV_STATE_DEFAULT);
-//     lv_label_set_text_fmt(labelSetValue, "%02d", 22);
-// 
-// 	labelCelsius = lv_label_create(scr1);
-// 	lv_obj_align_to(labelCelsius, labelFloor, LV_ALIGN_OUT_RIGHT_TOP, 0, 0);
-// 	lv_obj_set_style_text_font(labelCelsius, &monts15, LV_STATE_DEFAULT);
-// 	lv_obj_set_style_text_color(labelCelsius, lv_color_white(), LV_STATE_DEFAULT);
-// 	lv_label_set_text_fmt(labelCelsius, "°C");
-// 
-// 	labelConfig = lv_label_create(scr1);
-// 	lv_obj_align_to(labelConfig, labelSetValue, LV_ALIGN_OUT_LEFT_TOP, 17, 0);
-// 	lv_obj_set_style_text_color(labelConfig, lv_color_white(), LV_STATE_DEFAULT);
-// 	lv_label_set_text_fmt(labelConfig, LV_SYMBOL_SETTINGS);
-// 
-// 	labelSet = lv_label_create(scr1);
-// 	lv_obj_align_to(labelSet, labelConfig, LV_ALIGN_OUT_BOTTOM_LEFT, -10, 10);
-// 	lv_obj_set_style_text_font(labelSet, &monts15, LV_STATE_DEFAULT);
-// 	lv_obj_set_style_text_color(labelSet, lv_color_white(), LV_STATE_DEFAULT);
-// 	lv_label_set_text_fmt(labelSet, "MAIO");
-// 
-// 	labelClock2 = lv_img_create(scr1);
-// 	lv_img_set_src(labelClock2, &clock);
-// 	lv_obj_set_height(labelClock2, 25);
-// 	lv_obj_set_width(labelClock2, 25);
-// 	lv_obj_align_to(labelClock2, labelSetValue, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 15);
-// 
-// 	labelFumaca = lv_img_create(scr1);
-// 	lv_img_set_src(labelFumaca, &fumaca);
-// 	lv_obj_set_height(labelFumaca, 25);
-// 	lv_obj_set_width(labelFumaca, 30);
-// 	lv_obj_align_to(labelFumaca, labelClock2, LV_ALIGN_OUT_RIGHT_MID, 8, -2);
-// 
-// 	labelDia = lv_label_create(scr1);
-// 	lv_obj_align(labelDia, LV_ALIGN_TOP_LEFT, 10, 10);
-// 	lv_obj_set_style_text_font(labelDia, &monts15, LV_STATE_DEFAULT);
-// 	lv_obj_set_style_text_color(labelDia, lv_color_white(), LV_STATE_DEFAULT);
-// 	lv_label_set_text_fmt(labelDia, "SEG");
-// 
-// 	labelCelsius2 = lv_label_create(scr1);
-// 	lv_obj_align_to(labelCelsius2, labelSetValue, LV_ALIGN_OUT_RIGHT_TOP, 2, 0);
-// 	lv_obj_set_style_text_font(labelCelsius2, &monts15, LV_STATE_DEFAULT);
-// 	lv_obj_set_style_text_color(labelCelsius2, lv_color_white(), LV_STATE_DEFAULT);
-// 	lv_label_set_text_fmt(labelCelsius2, "°C");
-// 
-// 	labelFT = lv_label_create(scr1);
-// 	lv_obj_align(labelFT, LV_ALIGN_LEFT_MID, 2 , -55);
-// 	lv_obj_set_style_text_font(labelFT, &monts10, LV_STATE_DEFAULT);
-// 	lv_obj_set_style_text_color(labelFT, lv_color_white(), LV_STATE_DEFAULT);
-// 	lv_label_set_text_fmt(labelFT, "FLOOR");
-// 
-// 	labelFT2 = lv_label_create(scr1);
-// 	lv_obj_align_to(labelFT2, labelFT, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 2);
-// 	lv_obj_set_style_text_font(labelFT2, &monts10, LV_STATE_DEFAULT);
-// 	lv_obj_set_style_text_color(labelFT2, lv_color_white(), LV_STATE_DEFAULT);
-// 	lv_label_set_text_fmt(labelFT2, "TEMP");
 }
 
 
@@ -525,12 +387,31 @@ void magnet_callback(void){
 
 void MAGNET_INIT(int mode){
 	if (mode == 0){
-		pmc_enable_periph_clk(MAGNET_PIO_ID);
-		pio_set_input(MAGNET_PIO,MAGNET_PIO_IDX_MASK,PIO_PULLUP);
-		pio_handler_set(MAGNET_PIO, MAGNET_PIO_ID, MAGNET_PIO_IDX_MASK, PIO_IT_RISE_EDGE, magnet_callback);
-		pio_enable_interrupt(MAGNET_PIO, MAGNET_PIO_IDX_MASK);
-		NVIC_EnableIRQ(MAGNET_PIO_ID);
-		NVIC_SetPriority(MAGNET_PIO_ID, 4);
+
+		  // Inicializa clock do periférico PIO responsavel pelo botao
+		  pmc_enable_periph_clk(MAGNET_PIO_ID);
+
+		  // Configura PIO para lidar com o pino do botão como entrada
+		  // com pull-up
+		  pio_configure(MAGNET_PIO, PIO_INPUT, MAGNET_PIO_IDX_MASK, PIO_PULLUP);
+
+		  // Configura interrupção no pino referente ao botao e associa
+		  // função de callback caso uma interrupção for gerada
+		  // a função de callback é a: but_callback()
+		  pio_handler_set(MAGNET_PIO,
+		  MAGNET_PIO_ID,
+		  MAGNET_PIO_IDX_MASK,
+		  PIO_IT_FALL_EDGE,
+		  magnet_callback);
+
+		  // Ativa interrupção e limpa primeira IRQ gerada na ativacao
+		  pio_enable_interrupt(MAGNET_PIO, MAGNET_PIO_IDX_MASK);
+		  pio_get_interrupt_status(MAGNET_PIO);
+		  
+		  // Configura NVIC para receber interrupcoes do PIO do botao
+		  // com prioridade 4 (quanto mais próximo de 0 maior)
+		  NVIC_EnableIRQ(MAGNET_PIO_ID);
+		  NVIC_SetPriority(MAGNET_PIO_ID, 4); // Prioridade 4
 	}
 	else{
 		pmc_enable_periph_clk(MAGNET_PIO_ID);
@@ -801,7 +682,10 @@ int main(void) {
 	board_init();
 	sysclk_init();
 	configure_console();
-	MAGNET_INIT(1);
+	xMutexLVGL = xSemaphoreCreateMutex();
+
+	xQueueMagnet = xQueueCreate(10, sizeof(uint32_t));
+	MAGNET_INIT(0);
 	/* Disable the watchdog */                                                                      
     WDT->WDT_MR = WDT_MR_WDDIS;  
 
@@ -811,9 +695,7 @@ int main(void) {
 	configure_touch();
 	configure_lvgl();
 	
-	xMutexLVGL = xSemaphoreCreateMutex();
-
-	xQueueMagnet = xQueueCreate(10, sizeof(uint32_t));
+	
 
 	/* Create task to control oled */
 	if (xTaskCreate(task_lcd, "LCD", TASK_LCD_STACK_SIZE, NULL, TASK_LCD_STACK_PRIORITY, NULL) != pdPASS) {
@@ -826,11 +708,11 @@ int main(void) {
 	if (xTaskCreate(task_magnet, "Magnet", TASK_MAGNET_STACK_SIZE, NULL, TASK_MAGNET_STACK_PRIORITY, NULL) != pdPASS) {
 		printf("Failed to create magnet task\r\n");
 	}
-	
+	/*
 	if (xTaskCreate(task_simulador, "Simulador", TASK_SIMULATOR_STACK_SIZE, NULL, TASK_SIMULATOR_STACK_PRIORITY, NULL) != pdPASS) {
 		printf("Failed to create simulador task\r\n");
 	}
-	
+	*/
 
 	/* Start the scheduler. */
 	vTaskStartScheduler();
