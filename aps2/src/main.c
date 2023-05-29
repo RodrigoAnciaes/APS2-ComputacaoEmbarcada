@@ -474,11 +474,11 @@ void task_magnet(void *pvParameters){
 	while(1){
 		// read the magnet queue
 		if (xQueueReceive(xQueueMagnet, &tempo, portMAX_DELAY) == pdTRUE){
-				tempo_em_segundos = (float)tempo/10000;
+				tempo_em_segundos = ((float)tempo/10000)*0.95;
 				vTaskDelay(100);
 				printf("Tempo em segundos: %f\n", tempo_em_segundos);
 				float raio = diametro_roda/2;
-				velocidade = (2*PI*raio)*3.6/tempo_em_segundos;
+				velocidade = ((2*PI*raio)*3.6/tempo_em_segundos);
 				printf("Velocidade: %f Km/h\n", velocidade);
 				aceleracao = (velocidade - ultima_velocidade);
 				printf("Aceleracao: %f\n", aceleracao);
@@ -506,7 +506,8 @@ void task_magnet(void *pvParameters){
 					xSemaphoreGive(xMutexLVGL);
 
 					// calcula a velocidade media
-					velocidadeMedia = velocidadeMedia + (velocidade - velocidadeMedia)/2;
+					float tempoPercorrdo_em_horas = (float)tempoPercorrido/3600;
+					velocidadeMedia = distanciaPercorrida/tempoPercorrdo_em_horas;
 					// alterar a velocidade media no display
 					xSemaphoreTake(xMutexLVGL, portMAX_DELAY);
 					// formata o texto
